@@ -6,7 +6,7 @@ st.title("💬 Gemini Chatbot")
 # Configure Gemini with your secret key
 genai.configure(api_key=st.secrets["api_keys"]["gemini"])
 
-MODEL_NAME = "gemini-1.5-flash"  # or "gemini-1.5-pro" for deeper reasoning
+MODEL_NAME = "models/gemini-flash-latest"  # or "gemini-1.5-pro" for deeper reasoning
 
 # Initialize chat once
 if "chat" not in st.session_state:
