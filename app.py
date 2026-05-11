@@ -1,30 +1,33 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 
-# Configure Gemini with secret key
-genai.configure(api_key=st.secrets["api_keys"]["gemini"])
+# Configure Gemini client with secret key
+client = genai.Client(api_key=st.secrets["api_keys"]["gemini"])
 
-# Initialize model
-model = genai.GenerativeModel("gemini-3.1-flash-live-preview")
+# Choose a valid model from your list
+MODEL_NAME = "models/gemini-2.5-flash"   # or "models/gemini-flash-latest"
 
 st.title("💬 Gemini Chatbot")
 
-# Session state for conversation history
+# Initialize chat session in Streamlit state
 if "chat" not in st.session_state:
-    st.session_state.chat = model.start_chat(history=[])
+    st.session_state.chat = client.chats.create(model=MODEL_NAME)
 
-# User input
+# User input box
 user_input = st.text_input("You:", "")
 
 if user_input:
     # Send message to Gemini
     response = st.session_state.chat.send_message(user_input)
 
-    # Display response
+    # Display Gemini’s reply
     st.markdown(f"**Gemini:** {response.text}")
 
     # Show conversation history
     with st.expander("Conversation history"):
         for msg in st.session_state.chat.history:
             role = "You" if msg.role == "user" else "Gemini"
-            st.write(f"**{role}:** {msg.parts[0].text}")
+            # Each message may have multiple parts; display text parts
+            for part in msg.parts:
+                if hasattr(part, "text"):
+                    st.write(f"**{role}:** {part.text}")
