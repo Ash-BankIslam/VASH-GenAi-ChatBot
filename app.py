@@ -6,32 +6,28 @@ st.title("💬 Gemini Chatbot")
 # Configure Gemini with your secret key
 genai.configure(api_key=st.secrets["api_keys"]["gemini"])
 
-MODEL_NAME = "models/gemini-flash-latest"  # or "gemini-1.5-pro" for deeper reasoning
+# Use the "latest" alias for Flash
+MODEL_NAME = "models/gemini-flash-latest"
 
-# Initialize chat once
+# Initialize chat session once
 if "chat" not in st.session_state:
     model = genai.GenerativeModel(MODEL_NAME)
     st.session_state.chat = model.start_chat(history=[])
 
-# Keep our own history list
-if "history" not in st.session_state:
-    st.session_state.history = []
-
-# User input
-user_input = st.text_input("You:", "")
+# Chat-style input box
+user_input = st.chat_input("Type your message...")
 
 if user_input:
     # Send message to Gemini
     response = st.session_state.chat.send_message(user_input)
 
-    # Save both user and Gemini messages
-    st.session_state.history.append(("You", user_input))
-    st.session_state.history.append(("Gemini", response.text))
+    # Show user + Gemini messages in chat bubbles
+    st.chat_message("user").write(user_input)
+    st.chat_message("assistant").write(response.text)
 
-    # Display Gemini’s reply
-    st.markdown(f"**Gemini:** {response.text}")
-
-# Show conversation history
+# Show full conversation history (like Gemini web)
 with st.expander("Conversation history"):
-    for role, text in st.session_state.history:
-        st.write(f"**{role}:** {text}")
+    for msg in st.session_state.chat.history:
+        role = "You" if msg.role == "user" else "Gemini"
+        if msg.parts and hasattr(msg.parts[0], "text"):
+            st.write(f"**{role}:** {msg.parts[0].text}")
