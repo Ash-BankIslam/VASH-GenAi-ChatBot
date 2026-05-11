@@ -1,17 +1,17 @@
 import streamlit as st
-from google import genai
+import google.generativeai as genai
 
 st.title("💬 Gemini Chatbot")
 
-# Initialize client once
-if "client" not in st.session_state:
-    st.session_state.client = genai.Client(api_key=st.secrets["api_keys"]["gemini"])
+# Configure Gemini with your secret key
+genai.configure(api_key=st.secrets["api_keys"]["gemini"])
 
-MODEL_NAME = "models/gemini-flash-latest"
+MODEL_NAME = "gemini-1.5-flash"  # or "gemini-1.5-pro" for deeper reasoning
 
 # Initialize chat once
 if "chat" not in st.session_state:
-    st.session_state.chat = st.session_state.client.chats.create(model=MODEL_NAME)
+    model = genai.GenerativeModel(MODEL_NAME)
+    st.session_state.chat = model.start_chat(history=[])
 
 # Keep our own history list
 if "history" not in st.session_state:
