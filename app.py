@@ -5,7 +5,7 @@ import google.generativeai as genai
 genai.configure(api_key=st.secrets["api_keys"]["gemini"])
 
 # Initialize model
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-3.1-flash-live-preview")
 
 st.title("💬 Gemini Chatbot")
 
