@@ -1,20 +1,20 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai   # <-- use google-genai, not google.generativeai
 
 st.title("💬 Gemini Chatbot")
 
-# Configure Gemini with your secret key
-genai.configure(api_key=st.secrets["api_keys"]["gemini"])
+# Initialize client once
+if "client" not in st.session_state:
+    st.session_state.client = genai.Client(api_key=st.secrets["api_keys"]["gemini"])
 
 # Use the "latest" alias for Flash
 MODEL_NAME = "models/gemini-flash-latest"
 
-# Initialize chat session once
+# Initialize chat once
 if "chat" not in st.session_state:
-    model = genai.GenerativeModel(MODEL_NAME)
-    st.session_state.chat = model.start_chat(history=[])
+    st.session_state.chat = st.session_state.client.chats.create(model=MODEL_NAME)
 
-# Chat-style input box
+# User input (chat-style)
 user_input = st.chat_input("Type your message...")
 
 if user_input:
@@ -25,9 +25,10 @@ if user_input:
     st.chat_message("user").write(user_input)
     st.chat_message("assistant").write(response.text)
 
-# Show full conversation history (like Gemini web)
+# Show full conversation history
 with st.expander("Conversation history"):
-    for msg in st.session_state.chat.history:
-        role = "You" if msg.role == "user" else "Gemini"
-        if msg.parts and hasattr(msg.parts[0], "text"):
-            st.write(f"**{role}:** {msg.parts[0].text}")
+    for turn in st.session_state.chat.history:
+        role = "You" if turn.role == "user" else "Gemini"
+        for part in turn.parts:
+            if hasattr(part, "text"):
+                st.write(f"**{role}:** {part.text}")
